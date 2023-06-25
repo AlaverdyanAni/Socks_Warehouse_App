@@ -17,6 +17,7 @@
         <java.version>17</java.version>
         <mapstruct.version>1.5.3.Final</mapstruct.version>
         <webmvc.ui.version>2.1.0</webmvc.ui.version>
+        <testcontainers.junit.version>1.18.3</testcontainers.junit.version>
     </properties>
     <dependencies>
         <dependency>
@@ -45,6 +46,7 @@
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
+
         <dependency>
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
@@ -69,6 +71,18 @@
             <version>${webmvc.ui.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${testcontainers.junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 

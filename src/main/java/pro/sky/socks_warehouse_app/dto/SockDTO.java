@@ -15,13 +15,17 @@ import jakarta.validation.constraints.NotNull;
 @Schema(description = "Сущность для носков")
 public class SockDTO {
 
-    /** Цвет носков*/
+    /**
+     * Цвет носков
+     */
 
     @Schema(description = "Цвет")
     @NotNull(message = "Color не должно быть null")
     private String color;
 
-    /** Процент хлопка в составе носков*/
+    /**
+     * Процент хлопка в составе носков
+     */
 
     @Schema(description = "Процент хлопка")
     @NotNull(message = "Cotton part не должно быть null")
@@ -29,7 +33,9 @@ public class SockDTO {
     @Max(value = 100, message = "Максимальное число должно быть не больше 100")
     private Integer cottonPart;
 
-    /** Количество носков*/
+    /**
+     * Количество носков
+     */
 
     @Schema(description = "Количество")
     @NotNull(message = "Quantity не должно быть null")
@@ -37,5 +43,5 @@ public class SockDTO {
     @Max(value = Integer.MAX_VALUE, message = "Максимальное число должно быть не больше Integer.MAX_VALUE")
     private Integer quantity;
 
-    }
+}
 
