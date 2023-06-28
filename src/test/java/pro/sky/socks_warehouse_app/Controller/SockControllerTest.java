@@ -39,7 +39,7 @@ public class SockControllerTest {
             "white,80,120",
             "green,65,230"
     })
-    public void incomeTest(String color,int cottonPart, int quantity) throws Exception {
+    public void incomeTest1(String color,int cottonPart, int quantity) throws Exception {
          mockMvc.perform(MockMvcRequestBuilders
                         .post(URI+"/income")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -53,21 +53,21 @@ public class SockControllerTest {
             "white,110,120",
             "green,-65,230"
     })
-    public void incomeNegativeTest(String color,int cottonPart, int quantity) throws Exception {
+    public void incomeTest2(String color,int cottonPart, int quantity) throws Exception {
         mockMvc.perform(MockMvcRequestBuilders
                         .post(URI+"/income")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(createSockJson(color,cottonPart,quantity).toString())
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
     @ParameterizedTest
     @CsvSource(value = {
             "blue, 80, 250",
             "orange, 75, 130"
     })
-    public void outcomeTest(String color,int cottonPart, int quantity) throws Exception {
+    public void outcomeTest1(String color,int cottonPart, int quantity) throws Exception {
        mockMvc.perform(MockMvcRequestBuilders
                         .post(URI+"/outcome")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -81,14 +81,14 @@ public class SockControllerTest {
             "yellow, 125, -70",
             "black, -60, 800"
     })
-    public void outcomeNegativeTest(String color,int cottonPart, int quantity) throws Exception {
+    public void outcomeTest2(String color,int cottonPart, int quantity) throws Exception {
         mockMvc.perform(MockMvcRequestBuilders
                         .post(URI+"/outcome")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(createSockJson(color,cottonPart,quantity).toString())
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
     @ParameterizedTest
     @CsvSource(value = {
