@@ -1,9 +1,12 @@
 package pro.sky.socks_warehouse_app.controller;
 
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pro.sky.socks_warehouse_app.dto.SockDTO;
@@ -19,53 +22,51 @@ public class SockController {
         this.sockService = sockService;
     }
 
-    @Operation(
-            summary = "Регистрация прихода носков",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Сохраняет партию носков в базу данных"
-                    )
+    @Operation(summary = "Регистрация прихода носков")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "Сохраняет партию носков в базу данных"),
+                    @ApiResponse(responseCode = "400", description = "Невалидное поле!"),
             }
     )
     @PostMapping("/income")
-    private void income(@RequestBody SockDTO sockDTO ) {
+    private void income(@RequestBody @Valid SockDTO sockDTO ) {
         sockService.addSock(sockDTO);
+
     }
-    @Operation(
-            summary = "Регистрация отпуска носков",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Уменьшает количество носков в базе данных"
-                    )
+
+    @Operation(summary = "Регистрация отпуска носков")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "Уменьшает количество носков в базе данных"),
+                    @ApiResponse(responseCode = "400", description = "Невалидное поле!"),
+                    @ApiResponse(responseCode = "404", description = "Носки с такими параметрами не найдены!"),
             }
     )
     @PostMapping("/outcome")
-    private void outcome(@RequestBody SockDTO sockDTO) {
+    private void outcome(@RequestBody  @Valid SockDTO sockDTO) {
         sockService.deleteSock(sockDTO);
     }
 
 
-    @Operation(
-            summary = "Получение общего колличества носков по указанным параметрам",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Возвращяет общее колличество носков по указанным параметрам"
-                    )
+    @Operation(summary = "Получение общего колличества носков по указанным параметрам")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "Возвращяет общее колличество носков по указанным параметрам"),
+                    @ApiResponse(responseCode = "400", description = "Невалидное поле!"),
+                    @ApiResponse(responseCode = "404", description = "Носки с такими параметрами не найдены!"),
+                    @ApiResponse(responseCode = "409", description = "Операция не найдена!"),
+
             }
     )
-
-
     @GetMapping
     private ResponseEntity<Integer> getQuantity(@Parameter(description = "Введите цвет", example = "red")
-                               @RequestParam (value = "color") String color,
-                                                @Parameter(description = "Введите значение количества хлопка в составе носков" +
-                                       " 'moreThan', 'lessThan', 'equal'", example = "equal")
-                               @RequestParam (value = "operation") String operation,
+                               @RequestParam @Valid @NotBlank  String color,
+                                                @Parameter(description = "Введите значение количества хлопка в составе носков " +
+                                                        "moreThan, lessThan, equal", example = "equal")
+                               @RequestParam @Valid @NotBlank String operation,
                                                 @Parameter(description = "Введите значение процента хлопка в составе носок", example = "50")
-                               @RequestParam (value = "cottonPart") int cottonPart) {
+                               @RequestParam @Valid @NotNull @Min(1) @Max(100) int cottonPart) {
         return ResponseEntity.ok().body(sockService.getQuantity(color, operation, cottonPart));
     }
 

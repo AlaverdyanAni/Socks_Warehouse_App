@@ -1,14 +1,18 @@
 package pro.sky.socks_warehouse_app.mapper;
 
 import pro.sky.socks_warehouse_app.dto.SockDTO;
-import pro.sky.socks_warehouse_app.entity.Sock;
 import org.mapstruct.*;
+import pro.sky.socks_warehouse_app.model.Sock;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface SockMapper {
     @Mapping(target = "color", expression = "java(sockDTO.getColor().toLowerCase())")
-    @Mapping(target = "cottonPart", source = "cottonPart")
-    @Mapping(target = "quantity", source = "quantity")
-    Sock sockDtoToSock(SockDTO sockDTO);
+    Sock toEntity(SockDTO sockDTO);
+
+    SockDTO toDto(Sock sock);
+
+    @Mapping(target = "id", ignore = true)
+    void enrichSock(SockDTO sockDTO, @MappingTarget Sock sock);
+
 }
 

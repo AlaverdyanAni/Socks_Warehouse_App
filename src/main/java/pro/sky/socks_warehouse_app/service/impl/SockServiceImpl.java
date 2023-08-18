@@ -5,15 +5,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import pro.sky.socks_warehouse_app.dto.SockDTO;
-import pro.sky.socks_warehouse_app.entity.Sock;
 import pro.sky.socks_warehouse_app.exception.LessThanZeroException;
-import pro.sky.socks_warehouse_app.exception.NotFoundException;
 import pro.sky.socks_warehouse_app.exception.OperationException;
 import pro.sky.socks_warehouse_app.exception.SockNotFoundException;
 import pro.sky.socks_warehouse_app.mapper.SockMapper;
+import pro.sky.socks_warehouse_app.model.Sock;
 import pro.sky.socks_warehouse_app.repository.SockRepository;
 import pro.sky.socks_warehouse_app.service.SockService;
 import java.security.InvalidParameterException;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -21,33 +21,29 @@ import java.security.InvalidParameterException;
 public class SockServiceImpl implements SockService {
 
     private final SockRepository sockRepository;
-    private final SockMapper mapper;
+    private final SockMapper sockMapper;
 
     /**
      * Метод для приема носков на склад
      *
      * @param sockDTO обьект для хранания параметров приема носков
      */
-
+@Override
+@Transactional
     public void addSock(SockDTO sockDTO) {
         log.info("Сохраняет партию носков в базу данных");
-        if (!sockDTO.getColor().isEmpty() && sockDTO.getCottonPart() > 0 && sockDTO.getCottonPart() <= 100
-                && sockDTO.getQuantity() > 0) {
-            Sock sock = sockRepository.findByColorAndCottonPart(sockDTO.getColor().toLowerCase(), sockDTO.getCottonPart());
-            if (!sockRepository.findAll().contains(sock)) {
-                sockRepository.save(mapper.sockDtoToSock(sockDTO));
-                log.info("{} Сохранен в базе данных", sock);
-            } else {
-                int quantity = sock.getQuantity() + sockDTO.getQuantity();
-                sock.setQuantity(quantity);
-                sockRepository.save(sock);
-                log.info("{} Изменен в базе данных", sock);
-            }
-        } else {
-            log.error("Неверный запрос");
-            throw new OperationException();
-        }
-    }
+    Optional <Sock> sockOrEmpty = sockRepository.findByColorAndCottonPart(sockDTO.getColor().toLowerCase(), sockDTO.getCottonPart());
+    if (sockOrEmpty.isEmpty()){
+        sockRepository.save(sockMapper.toEntity(sockDTO));
+        log.info("{} Сохранен в базе данных", sockMapper.toEntity(sockDTO));
+           } else {
+        Sock sock = sockOrEmpty.get();
+        sock.setQuantity(sock.getQuantity()+sockDTO.getQuantity());
+        sockRepository.save(sock);
+        log.info("{} Изменен в базе данных", sock);
+           }
+      }
+
 
     /**
      * Метод для отправки носков со склада
@@ -58,25 +54,21 @@ public class SockServiceImpl implements SockService {
     @Transactional
     public void deleteSock(SockDTO sockDTO) {
         log.info("Уменьшает количество носков в базе данных");
-        if (!sockDTO.getColor().isEmpty() && sockDTO.getCottonPart() > 0 && sockDTO.getCottonPart() <= 100 && sockDTO.getQuantity() > 0) {
-            Sock sock = sockRepository.findByColorAndCottonPart(sockDTO.getColor().toLowerCase(), sockDTO.getCottonPart());
-            int quantity = sock.getQuantity() - sockDTO.getQuantity();
-            if (quantity < 0) {
-                log.debug("На складе нет такого колличества носков");
-                throw new LessThanZeroException();
-            } else if (quantity == 0) {
-                sockRepository.deleteById(sock.getId());
-                log.info("{} Удален из базы данных", sock);
-            } else {
-                sock.setQuantity(quantity);
-                sockRepository.save(sock);
-                log.info("{} Изменен в базе данных", sock);
-            }
+        Sock sock = sockRepository.findByColorAndCottonPart(sockDTO.getColor().toLowerCase(), sockDTO.getCottonPart()).orElseThrow(() -> new SockNotFoundException());
+        int quantity = sock.getQuantity() - sockDTO.getQuantity();
+        if (quantity < 0) {
+            log.debug("На складе нет такого колличества носков");
+            throw new LessThanZeroException();
+        } else if (quantity == 0) {
+            sockRepository.deleteById(sock.getId());
+            log.info("{} Удален из базы данных", sock);
         } else {
-            log.error("Неверный запрос");
-            throw new OperationException();
+            sock.setQuantity(quantity);
+            sockRepository.save(sock);
+            log.info("{} Изменен в базе данных", sock);
         }
     }
+
 
 
     /**
@@ -90,32 +82,27 @@ public class SockServiceImpl implements SockService {
 
     @Override
     @Transactional
-
     public Integer getQuantity(String color, String operation, Integer cottonPart) {
         log.info("Возвращяет общее колличество носков по указанным параметрам");
-        if (cottonPart < 0 || cottonPart > 100) throw new InvalidParameterException();
+      // if (color.isEmpty() || operation.isEmpty() || cottonPart < 0 || cottonPart > 100) {
+        //   throw new InvalidParameterException();
+       //}
+       if (sockRepository.findByColor(color).isEmpty()) {
+           throw new SockNotFoundException();
+       }
         switch (operation) {
             case "moreThan" -> {
                 Integer count = sockRepository.findByCottonPartMoreThan(color.toLowerCase(), cottonPart);
-                if (count == null) throw new SockNotFoundException();
-                else {
                     return checkingSockCount(count);
                 }
-            }
             case "lessThan" -> {
                 Integer count = sockRepository.findByCottonPartLessThan(color.toLowerCase(), cottonPart);
-                if (count == null) throw new SockNotFoundException();
-                else {
                     return checkingSockCount(count);
                 }
-            }
             case "equal" -> {
                 Integer count = sockRepository.findByCottonPartEquals(color.toLowerCase(), cottonPart);
-                if (count == null) throw new SockNotFoundException();
-                else {
                     return checkingSockCount(count);
                 }
-            }
             default -> throw new OperationException();
         }
     }
@@ -130,8 +117,8 @@ public class SockServiceImpl implements SockService {
         if (count != null)
             return count;
         else {
-            log.debug("На складе нет носков с такими параметрами");
-            throw new NotFoundException();
+            log.debug("На складе нет носков");
+            throw new SockNotFoundException();
         }
     }
 }
