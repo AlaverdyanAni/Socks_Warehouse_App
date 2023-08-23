@@ -11,9 +11,9 @@ import java.util.Optional;
 
 public interface SockRepository extends JpaRepository<Sock, Long> {
 
-    @Query(value = "SELECT s. * FROM sock s  WHERE s.color=?1", nativeQuery = true)
+    @Query(value = "SELECT s.* FROM sock s  WHERE s.color=?1", nativeQuery = true)
     Collection<Sock> findByColor (String color);
-    @Query(value = "SELECT s. * FROM sock s  WHERE s.color=?1 and s.cotton_part=?2", nativeQuery = true)
+    @Query(value = "SELECT s.* FROM sock s  WHERE s.color=?1 and s.cotton_part=?2", nativeQuery = true)
     Optional<Sock> findByColorAndCottonPart (String color, Integer cottonPart);
 
     @Query(value = "SELECT SUM(quantity) FROM sock WHERE color = :color AND cotton_part = :cottonPart", nativeQuery = true)

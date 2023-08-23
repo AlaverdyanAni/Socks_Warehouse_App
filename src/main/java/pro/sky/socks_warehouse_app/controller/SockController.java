@@ -61,12 +61,12 @@ public class SockController {
     )
     @GetMapping
     private ResponseEntity<Integer> getQuantity(@Parameter(description = "Введите цвет", example = "red")
-                               @RequestParam @Valid @NotBlank  String color,
+                               @RequestParam @NotBlank  String color,
                                                 @Parameter(description = "Введите значение количества хлопка в составе носков " +
                                                         "moreThan, lessThan, equal", example = "equal")
-                               @RequestParam @Valid @NotBlank String operation,
+                               @RequestParam @NotBlank String operation,
                                                 @Parameter(description = "Введите значение процента хлопка в составе носок", example = "50")
-                               @RequestParam @Valid @NotNull @Min(1) @Max(100) int cottonPart) {
+                               @RequestParam @NotNull @Min(1) @Max(100) int cottonPart) {
         return ResponseEntity.ok().body(sockService.getQuantity(color, operation, cottonPart));
     }
 
